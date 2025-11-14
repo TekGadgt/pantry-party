@@ -4,16 +4,22 @@ import { v } from "convex/values";
 // Create a new room
 export const createRoom = mutation({
   args: {
+    name: v.string(),
     ownerName: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
+    // TODO: Re-enable auth when ready
+    // const identity = await ctx.auth.getUserIdentity();
+    // if (!identity) {
+    //   throw new Error("Not authenticated");
+    // }
+    
+    // For now, use a temporary ID
+    const tempUserId = "temp-user-" + Date.now();
 
     const roomId = await ctx.db.insert("rooms", {
-      ownerId: identity.subject,
+      name: args.name,
+      ownerId: tempUserId,
       ownerName: args.ownerName,
       status: "draft",
       createdAt: Date.now(),
@@ -22,7 +28,7 @@ export const createRoom = mutation({
     // Add owner as first participant
     await ctx.db.insert("participants", {
       roomId,
-      userId: identity.subject,
+      userId: tempUserId,
       userName: args.ownerName,
       joinedAt: Date.now(),
     });
@@ -48,10 +54,13 @@ export const joinRoom = mutation({
     userName: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
+    // TODO: Re-enable auth when ready
+    // const identity = await ctx.auth.getUserIdentity();
+    // if (!identity) {
+    //   throw new Error("Not authenticated");
+    // }
+    
+    const tempUserId = "temp-user-" + Date.now();
 
     const room = await ctx.db.get(args.roomId);
     if (!room) {
@@ -62,13 +71,13 @@ export const joinRoom = mutation({
     const existing = await ctx.db
       .query("participants")
       .withIndex("by_room", (q) => q.eq("roomId", args.roomId))
-      .filter((q) => q.eq(q.field("userId"), identity.subject))
+      .filter((q) => q.eq(q.field("userId"), tempUserId))
       .first();
 
     if (!existing) {
       await ctx.db.insert("participants", {
         roomId: args.roomId,
-        userId: identity.subject,
+        userId: tempUserId,
         userName: args.userName,
         joinedAt: Date.now(),
       });

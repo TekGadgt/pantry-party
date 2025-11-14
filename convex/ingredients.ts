@@ -17,25 +17,13 @@ export const addIngredient = mutation({
     confidence: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
+    // TODO: Re-enable auth when ready
+    const tempUserId = "temp-user-" + Date.now();
+    const tempUserName = "Guest";
 
     const room = await ctx.db.get(args.roomId);
     if (!room) {
       throw new Error("Room not found");
-    }
-
-    // Verify user is a participant
-    const participant = await ctx.db
-      .query("participants")
-      .withIndex("by_room", (q) => q.eq("roomId", args.roomId))
-      .filter((q) => q.eq(q.field("userId"), identity.subject))
-      .first();
-
-    if (!participant) {
-      throw new Error("Not a participant in this room");
     }
 
     // Normalize ingredient name (lowercase, trim)
@@ -60,8 +48,8 @@ export const addIngredient = mutation({
 
     return await ctx.db.insert("ingredients", {
       roomId: args.roomId,
-      userId: identity.subject,
-      userName: participant.userName,
+      userId: tempUserId,
+      userName: tempUserName,
       name: normalizedName,
       amount: args.amount,
       unit: args.unit,
@@ -79,11 +67,7 @@ export const removeIngredient = mutation({
     ingredientId: v.id("ingredients"),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-
+    // TODO: Re-enable auth when ready
     const ingredient = await ctx.db.get(args.ingredientId);
     if (!ingredient) {
       throw new Error("Ingredient not found");
@@ -94,11 +78,7 @@ export const removeIngredient = mutation({
       throw new Error("Room not found");
     }
 
-    // Only owner or the user who added it can remove
-    if (ingredient.userId !== identity.subject && room.ownerId !== identity.subject) {
-      throw new Error("Not authorized to remove this ingredient");
-    }
-
+    // For now, allow anyone to remove
     await ctx.db.delete(args.ingredientId);
   },
 });

@@ -41,11 +41,14 @@ Raid your pantries and party together! A collaborative recipe generation web app
 
 3. **Configure environment variables**
    
-   Copy `.env.example` to `.env.local` and add your OpenAI API key:
-   ```
+   Copy `.env.example` to `.env.local` and add your keys:
+   ```bash
    CONVEX_DEPLOYMENT=<auto-filled-by-convex>
+   PUBLIC_CONVEX_URL=<auto-filled-by-convex>
    OPENAI_API_KEY=your_openai_api_key_here
    ```
+   
+   Note: Both `CONVEX_DEPLOYMENT` and `PUBLIC_CONVEX_URL` are automatically added when you run `npx convex dev`
 
 4. **Start the development server**
    ```bash

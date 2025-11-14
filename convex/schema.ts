@@ -3,6 +3,7 @@ import { v } from "convex/values";
 
 export default defineSchema({
   rooms: defineTable({
+    name: v.string(),
     ownerId: v.string(),
     ownerName: v.string(),
     status: v.union(
