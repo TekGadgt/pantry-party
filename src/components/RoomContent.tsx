@@ -114,11 +114,7 @@ export default function RoomContent({ roomId }: RoomContentProps) {
   const convex = useMemo(() => {
     // Try multiple ways to get the URL
     let url = import.meta.env.PUBLIC_CONVEX_URL;
-    
-    // Fallback for production or if env var isn't available
-    if (!url && typeof window !== 'undefined') {
-      url = (window as any).CONVEX_URL || 'http://127.0.0.1:3210';
-    }
+    console.log("RoomContent - Initial Convex URL from env:", url);
     
     if (!url) {
       console.error("❌ PUBLIC_CONVEX_URL is not set! Using fallback.");

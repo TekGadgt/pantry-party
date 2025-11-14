@@ -131,9 +131,8 @@ function CreateRoomFormInner() {
 export default function CreateRoomForm() {
   const convex = useMemo(() => {
     let url = import.meta.env.PUBLIC_CONVEX_URL;
-    if (!url && typeof window !== "undefined") {
-      url = (window as any).CONVEX_URL || "http://127.0.0.1:3210";
-    }
+    console.log("CreateRoomForm - Initial Convex URL:", url);
+
     if (!url) {
       url = "http://127.0.0.1:3210";
     }
