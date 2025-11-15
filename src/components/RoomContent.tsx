@@ -1,11 +1,13 @@
 import { ClerkProvider, useAuth } from "@clerk/clerk-react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
-import { ConvexReactClient } from "convex/react";
-import { useMemo } from "react";
+import { ConvexReactClient, useMutation } from "convex/react";
+import { useMemo, useEffect } from "react";
 import RoomData from "./RoomData";
 import IngredientList from "./IngredientList";
 import RecipeGeneration from "./RecipeGeneration";
 import ConstraintsForm from "./ConstraintsForm";
+import ParticipantsList from "./ParticipantsList";
+import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 
 interface RoomContentProps {
@@ -13,6 +15,23 @@ interface RoomContentProps {
 }
 
 function RoomContentInner({ roomId }: RoomContentProps) {
+  const joinRoom = useMutation(api.rooms.joinRoom);
+
+  // Auto-join room when component mounts
+  useEffect(() => {
+    const autoJoin = async () => {
+      try {
+        console.log("Auto-joining room:", roomId);
+        await joinRoom({ roomId });
+        console.log("Successfully joined room");
+      } catch (err) {
+        console.error("Failed to auto-join room:", err);
+        // Non-fatal - user might already be a participant
+      }
+    };
+    autoJoin();
+  }, [roomId, joinRoom]);
+
   return (
     <div className="grid lg:grid-cols-3 gap-8">
       {/* Main Content */}
@@ -30,15 +49,7 @@ function RoomContentInner({ roomId }: RoomContentProps) {
       {/* Sidebar */}
       <div className="space-y-6">
         {/* Participants */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">👥 Participants</h3>
-          <div id="participants-list" className="space-y-2">
-            <div className="flex items-center gap-2 text-gray-700">
-              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              <span>Loading...</span>
-            </div>
-          </div>
-        </div>
+        <ParticipantsList roomId={roomId} />
 
         {/* Constraints */}
         <ConstraintsForm roomId={roomId} />

@@ -6,7 +6,6 @@ import { api } from "../../convex/_generated/api";
 
 function CreateRoomFormInner() {
   const [roomName, setRoomName] = useState("");
-  const [ownerName, setOwnerName] = useState("");
   const [createdRoomId, setCreatedRoomId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,10 +18,9 @@ function CreateRoomFormInner() {
     setIsCreating(true);
 
     try {
-      console.log("Creating room:", { name: roomName, ownerName });
+      console.log("Creating room:", { name: roomName });
       const roomId = await createRoom({
         name: roomName,
-        ownerName: ownerName,
       });
       console.log("Room created:", roomId);
       setCreatedRoomId(roomId);
@@ -92,24 +90,6 @@ function CreateRoomFormInner() {
           required
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           placeholder="e.g., Friday Dinner Party"
-        />
-      </div>
-
-      <div>
-        <label
-          htmlFor="owner-name"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
-          Your Name
-        </label>
-        <input
-          type="text"
-          id="owner-name"
-          value={ownerName}
-          onChange={(e) => setOwnerName(e.target.value)}
-          required
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          placeholder="Enter your name"
         />
       </div>
 

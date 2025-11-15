@@ -1,4 +1,4 @@
-import { useAction, useQuery, useMutation } from "convex/react";
+import { Authenticated, useAction, useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { useState } from "react";
@@ -108,13 +108,15 @@ export default function RecipeGeneration({ roomId }: RecipeGenerationProps) {
               const userHasVoted = userVotes.has(recipe._id);
               
               return (
-                <RecipeCard
-                  key={recipe._id}
-                  recipe={{ ...recipe, voteCount }}
-                  roomId={roomId}
-                  onVote={handleVote}
-                  userHasVoted={userHasVoted}
-                />
+                <Authenticated>
+                  <RecipeCard
+                    key={recipe._id}
+                    recipe={{ ...recipe, voteCount }}
+                    roomId={roomId}
+                    onVote={handleVote}
+                    userHasVoted={userHasVoted}
+                  />
+                </Authenticated>
               );
             })}
           </div>

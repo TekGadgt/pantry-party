@@ -5,22 +5,20 @@ import { v } from "convex/values";
 export const createRoom = mutation({
   args: {
     name: v.string(),
-    ownerName: v.string(),
   },
   handler: async (ctx, args) => {
-    // TODO: Re-enable auth when ready
-    // const identity = await ctx.auth.getUserIdentity();
-    // if (!identity) {
-    //   throw new Error("Not authenticated");
-    // }
-    
-    // For now, use a temporary ID
-    const tempUserId = "temp-user-" + Date.now();
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = identity.subject;
+    const userName = identity.name || identity.email || "Anonymous";
 
     const roomId = await ctx.db.insert("rooms", {
       name: args.name,
-      ownerId: tempUserId,
-      ownerName: args.ownerName,
+      ownerId: userId,
+      ownerName: userName,
       status: "draft",
       createdAt: Date.now(),
     });
@@ -28,8 +26,8 @@ export const createRoom = mutation({
     // Add owner as first participant
     await ctx.db.insert("participants", {
       roomId,
-      userId: tempUserId,
-      userName: args.ownerName,
+      userId: userId,
+      userName: userName,
       joinedAt: Date.now(),
     });
 
@@ -51,16 +49,15 @@ export const createRoom = mutation({
 export const joinRoom = mutation({
   args: {
     roomId: v.id("rooms"),
-    userName: v.string(),
   },
   handler: async (ctx, args) => {
-    // TODO: Re-enable auth when ready
-    // const identity = await ctx.auth.getUserIdentity();
-    // if (!identity) {
-    //   throw new Error("Not authenticated");
-    // }
-    
-    const tempUserId = "temp-user-" + Date.now();
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = identity.subject;
+    const userName = identity.name || identity.email || "Anonymous";
 
     const room = await ctx.db.get(args.roomId);
     if (!room) {
@@ -71,14 +68,14 @@ export const joinRoom = mutation({
     const existing = await ctx.db
       .query("participants")
       .withIndex("by_room", (q) => q.eq("roomId", args.roomId))
-      .filter((q) => q.eq(q.field("userId"), tempUserId))
+      .filter((q) => q.eq(q.field("userId"), userId))
       .first();
 
     if (!existing) {
       await ctx.db.insert("participants", {
         roomId: args.roomId,
-        userId: tempUserId,
-        userName: args.userName,
+        userId: userId,
+        userName: userName,
         joinedAt: Date.now(),
       });
     }
